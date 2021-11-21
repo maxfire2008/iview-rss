@@ -36,7 +36,11 @@ def rss_show(show):
     request_result = requests.get(
         "https://api.iview.abc.net.au/v2/show/"+show
     )
-    include_extras = flask.request.args.get("include_extras", True, type=bool)
+    include_extras = flask.request.args.get("include_extras", "true")
+    if include_extras.lower() in ["true","1","yes","include"]:
+        include_extras = True
+    elif include_extras.lower() in ["false","0","no","exclude"]:
+        include_extras = False
     if request_result.status_code == 200:
         request_result_content = request_result.content.decode()
         show_info = json.loads(request_result_content)
@@ -72,7 +76,7 @@ def rss_show(show):
                         series_text=""
                         # if current_series['_links']['selectedSeries']['id'] != '0':
                             # series_text = "S"+current_series['_links']['selectedSeries']['id']+" "
-                        fe.title(f'{series_text}{episode["title"]}')
+                        fe.title(f'{series_text}EXTRA {episode["title"]}')
                         epiry_date = datetime.datetime.strptime(episode['expireDate'],"%Y-%m-%d %H:%M:%S").strftime("%I:%M%p %d/%m/%Y")
                         fe.description(f"Expires {epiry_date}\n{episode['description']}")
                         fe.link(href=episode['shareUrl'])
