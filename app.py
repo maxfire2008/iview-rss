@@ -43,8 +43,7 @@ window.location.href="https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-a
 <title>Page Redirection</title>
 </head>
 <body>If you are not redirected automatically, follow this <a href='https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html'>link</a>.</body>
-</html>
-""".replace("\n","")
+</html>""".replace("\n","")
 
 @app.route("/rss/<show>")
 def rss_show(show):
@@ -130,8 +129,7 @@ window.location.href=\""""+follow_it_urls[show]+"""\"
 <title>Page Redirection</title>
 </head>
 <body>If you are not redirected automatically, follow this <a href='"""+follow_it_urls[show]+"""'>link</a>.</body>
-</html>
-""".replace("\n","")
+</html>""".replace("\n","")
     else:
         return "This show does not exist! Check for typos.", 404
 
@@ -152,8 +150,7 @@ window.location.href="https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-a
 <title>Page Redirection</title>
 </head>
 <body>If you are not redirected automatically, follow this <a href='https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html'>link</a>.</body>
-</html>
-""".replace("\n","")
+</html>""".replace("\n","")
 
 # LAST_GIT_PULL = 0
 
