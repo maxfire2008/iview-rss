@@ -69,7 +69,8 @@ LAST_GIT_PULL = 0
 @app.route("/deploy_hook")
 def deploy_hook():
     global LAST_GIT_PULL
-    if LAST_GIT_PULL+10 > int(time.time):
+    if LAST_GIT_PULL+10 < int(time.time()):
         os.system("git pull")
+        LAST_GIT_PULL = int(time.time())
         return datetime.datetime.now().ctime()
     return "429", 429
