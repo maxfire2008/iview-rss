@@ -17,7 +17,19 @@ app = flask.Flask(__name__)
 
 @app.route("/")
 def index():
-    return 'iView RSS'
+    return """<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0; url=https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html">
+<script type="text/javascript">
+window.location.href="https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html"
+</script>
+<title>Page Redirection</title>
+</head>
+<body>If you are not redirected automatically, follow this <a href='https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html'>link</a>.</body>
+</html>
+""".replace("\n","")
 
 @app.route("/rss/<show>")
 def rss_show(show):
