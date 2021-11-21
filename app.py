@@ -36,6 +36,7 @@ def rss_show(show):
     request_result = requests.get(
         "https://api.iview.abc.net.au/v2/show/"+show
     )
+    include_extras = flask.request.args.get("include_extras", True, type=bool)
     if request_result.status_code == 200:
         request_result_content = request_result.content.decode()
         show_info = json.loads(request_result_content)
@@ -57,13 +58,25 @@ def rss_show(show):
                     fe = fg.add_entry()
                     fe.id("https://iview.abc.net.au"+episode['_links']['self']['href'])
                     series_text=""
-                    if current_series['_links']['selectedSeries']['id'] != '0':
-                        series_text = "S"+current_series['_links']['selectedSeries']['id']+" "
+                    # if current_series['_links']['selectedSeries']['id'] != '0':
+                        # series_text = "S"+current_series['_links']['selectedSeries']['id']+" "
                     fe.title(f'{series_text}{episode["title"]}')
                     epiry_date = datetime.datetime.strptime(episode['expireDate'],"%Y-%m-%d %H:%M:%S").strftime("%I:%M%p %d/%m/%Y")
                     fe.description(f"Expires {epiry_date}\n{episode['description']}")
                     fe.link(href=episode['shareUrl'])
                     fe.published(datetime.datetime.strptime(episode['pubDate'],"%Y-%m-%d %H:%M:%S").astimezone())
+                if include_extras and 'videoExtras' in current_series['_embedded']['selectedSeries']['_embedded']:
+                    for episode in current_series['_embedded']['selectedSeries']['_embedded']['videoExtras']:
+                        fe = fg.add_entry()
+                        fe.id("https://iview.abc.net.au"+episode['_links']['self']['href'])
+                        series_text=""
+                        # if current_series['_links']['selectedSeries']['id'] != '0':
+                            # series_text = "S"+current_series['_links']['selectedSeries']['id']+" "
+                        fe.title(f'{series_text}{episode["title"]}')
+                        epiry_date = datetime.datetime.strptime(episode['expireDate'],"%Y-%m-%d %H:%M:%S").strftime("%I:%M%p %d/%m/%Y")
+                        fe.description(f"Expires {epiry_date}\n{episode['description']}")
+                        fe.link(href=episode['shareUrl'])
+                        fe.published(datetime.datetime.strptime(episode['pubDate'],"%Y-%m-%d %H:%M:%S").astimezone())
             resp = flask.Response(fg.rss_str(pretty=True))
             resp.headers['Content-Type'] = 'application/rss+xml; charset=utf-8'
             return resp
