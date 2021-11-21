@@ -10,6 +10,7 @@ import flask
 import requests
 import json
 import datetime
+import time
 from feedgen.feed import FeedGenerator
 
 app = flask.Flask(__name__)
@@ -63,7 +64,12 @@ def rss_show(show):
         honeybadger.notify(f"{request_result.status_code} error code is not recognised!", context={"show_id": show})
         return "501", 501
 
+LAST_GIT_PULL = 0
+
 @app.route("/deploy_hook")
 def deploy_hook():
-    os.system("git pull")
-    return datetime.datetime.now().ctime()
+    global LAST_GIT_PULL
+    if LAST_GIT_PULL+10 > int(time.time):
+        os.system("git pull")
+        return datetime.datetime.now().ctime()
+    return "429", 429
