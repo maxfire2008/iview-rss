@@ -98,25 +98,6 @@ def rss_show(show):
         honeybadger.notify(f"{request_result.status_code} error code is not recognised!", context={"show_id": show})
         return "501", 501
 
-@app.route("/rss/follow.it-verification-code.html")
-def follow_it_verification_code():
-    return open("followit","rb").read()
-@app.route("/rss/")
-def follow_it_verification_code_2():
-    return """<!DOCTYPE HTML>
-<html lang="en-US">
-<head>
-<meta charset="UTF-8">
-<meta name="follow.it-verification-code" content="43aG11nrKhwqa5gUUfgt"/>
-<meta http-equiv="refresh" content="0; url=https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html">
-<script type="text/javascript">
-window.location.href="https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html"
-</script>
-<title>Page Redirection</title>
-</head>
-<body>If you are not redirected automatically, follow this <a href='https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html'>link</a>.</body>
-</html>
-""".replace("\n","")
 
 # LAST_GIT_PULL = 0
 
