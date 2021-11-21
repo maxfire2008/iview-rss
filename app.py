@@ -98,6 +98,10 @@ def rss_show(show):
         honeybadger.notify(f"{request_result.status_code} error code is not recognised!", context={"show_id": show})
         return "501", 501
 
+@app.route("/rss/follow.it-verification-code.html")
+def follow_it_verification_code():
+    return open("followit","rb").read()
+
 # LAST_GIT_PULL = 0
 
 # @app.route("/deploy_hook")
