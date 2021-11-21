@@ -21,28 +21,19 @@ gunicorn_error_logger = logging.getLogger('gunicorn.error')
 app.logger.handlers.extend(gunicorn_error_logger.handlers)
 app.logger.setLevel(logging.DEBUG)
 
-follow_it_urls = {}
-with open('followit.csv', newline='') as csvfile:
-    reader = csv.reader(csvfile, delimiter=",")
-    for row in reader:
-        try:
-            follow_it_urls[row[0]] = row[1]
-        except Exception as e:
-            print(e)
-
 @app.route("/")
 def index():
     return """<!DOCTYPE HTML>
 <html lang="en-US">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html">
+<meta http-equiv="refresh" content="0; url=https://maxstuff.net/iview-rss">
 <script type="text/javascript">
-window.location.href="https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html"
+window.location.href="https://maxstuff.net/iview-rss"
 </script>
 <title>Page Redirection</title>
 </head>
-<body>If you are not redirected automatically, follow this <a href='https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html'>link</a>.</body>
+<body>If you are not redirected automatically, follow this <a href='https://maxstuff.net/iview-rss'>link</a>.</body>
 </html>""".replace("\n","")
 
 @app.route("/rss/<show>")
@@ -56,8 +47,6 @@ def rss_show(show):
     elif include_extras.lower() in ["false","0","no","exclude"]:
         include_extras = False
     if request_result.status_code == 200:
-        if show not in follow_it_urls:
-            honeybadger.notify(f"{show} not in follow.it!", context={"show_id": show})
         request_result_content = request_result.content.decode()
         show_info = json.loads(request_result_content)
         fg = FeedGenerator()
@@ -109,48 +98,6 @@ def rss_show(show):
         honeybadger.notify(f"{request_result.status_code} error code is not recognised!", context={"show_id": show})
         return "501", 501
 
-@app.route("/followit/<show>")
-def followit_show(show):
-    request_result = requests.get(
-        "https://api.iview.abc.net.au/v2/show/"+show
-    )
-    if show not in follow_it_urls and request_result.status_code == 200:
-        honeybadger.notify(f"{show} not in follow.it!", context={"show_id": show})
-        return "Not avalible on follow.it - check back in a few days! <button onclick='history.back()'>Go Back!</button>"
-    elif request_result.status_code == 200:
-        return """<!DOCTYPE HTML>
-<html lang="en-US">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url="""+follow_it_urls[show]+"""\">
-<script type="text/javascript">
-window.location.href=\""""+follow_it_urls[show]+"""\"
-</script>
-<title>Page Redirection</title>
-</head>
-<body>If you are not redirected automatically, follow this <a href='"""+follow_it_urls[show]+"""'>link</a>.</body>
-</html>""".replace("\n","")
-    else:
-        return "This show does not exist! Check for typos.", 404
-
-@app.route("/rss/follow.it-verification-code.html")
-def follow_it_verification_code():
-    return open("followit","rb").read()
-@app.route("/rss/")
-def follow_it_verification_code_2():
-    return """<!DOCTYPE HTML>
-<html lang="en-US">
-<head>
-<meta charset="UTF-8">
-<meta name="follow.it-verification-code" content="43aG11nrKhwqa5gUUfgt"/>
-<meta http-equiv="refresh" content="0; url=https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html">
-<script type="text/javascript">
-window.location.href="https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html"
-</script>
-<title>Page Redirection</title>
-</head>
-<body>If you are not redirected automatically, follow this <a href='https://blog.maxstuff.net/2021/11/how-to-get-iview-shows-as-rss-feed.html'>link</a>.</body>
-</html>""".replace("\n","")
 
 # LAST_GIT_PULL = 0
 
