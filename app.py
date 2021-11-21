@@ -12,8 +12,13 @@ import json
 import datetime
 import time
 from feedgen.feed import FeedGenerator
+import logging
 
 app = flask.Flask(__name__)
+
+gunicorn_error_logger = logging.getLogger('gunicorn.error')
+app.logger.handlers.extend(gunicorn_error_logger.handlers)
+app.logger.setLevel(logging.DEBUG)
 
 @app.route("/")
 def index():
