@@ -100,6 +100,11 @@ def rss_show(show):
 
 @app.route("/watchlist/<uid>")
 def watchlist(uid):
+    include_extras = flask.request.args.get("include_extras", "true")
+    if include_extras.lower() in ["true","1","yes","include"]:
+        include_extras = True
+    elif include_extras.lower() in ["false","0","no","exclude"]:
+        include_extras = False
     watchlist_resp = requests.get("https://api.seesaw.abc.net.au/v1/saved/watchlist/show?source=iview&slug=watchlist&raw=1&done=0&UID="+uid)
     if watchlist_resp.status_code == 200:
         watchlist = json.loads(watchlist_resp.content.decode())
@@ -110,9 +115,51 @@ def watchlist(uid):
         fg.language('en')
         fg.author({'name':'Max','uri':'https://maxstuff.net'})
         fg.description("Compiled episodes of all shows on your iView watchlist.")
-        for item in watchlist['data']:
-            pass
-        return ''
+        for show_dict in watchlist['data']:
+            show = show_dict["key"]
+            request_result = requests.get(
+                "https://api.iview.abc.net.au/v2/show/"+show
+            )
+            if request_result.status_code == 200:
+                request_result_content = request_result.content.decode()
+                show_info = json.loads(request_result_content)
+                if show_info['type'] == 'series':
+                    for series in show_info['_embedded']['seriesList']:
+                        current_series = json.loads(
+                            requests.get(
+                                "https://api.iview.abc.net.au/v2"+series['_links']['deeplink']['href']
+                            ).content.decode()
+                        )
+                        for episode in current_series['_embedded']['selectedSeries']['_embedded']['videoEpisodes']:
+                            fe = fg.add_entry()
+                            fe.id("https://iview.abc.net.au"+episode['_links']['self']['href'])
+                            series_text=""
+                            # if current_series['_links']['selectedSeries']['id'] != '0':
+                                # series_text = "S"+current_series['_links']['selectedSeries']['id']+" "
+                            fe.title(f'{show_info["title"]} - {series_text}{episode["title"]}')
+                            epiry_date = datetime.datetime.strptime(episode['expireDate'],"%Y-%m-%d %H:%M:%S").strftime("%I:%M%p %d/%m/%Y")
+                            fe.description(f"Expires {epiry_date}\n{episode['description']}")
+                            fe.link(href=episode['shareUrl'])
+                            fe.published(datetime.datetime.strptime(episode['pubDate'],"%Y-%m-%d %H:%M:%S").astimezone())
+                        if include_extras and 'videoExtras' in current_series['_embedded']['selectedSeries']['_embedded']:
+                            for episode in current_series['_embedded']['selectedSeries']['_embedded']['videoExtras']:
+                                fe = fg.add_entry()
+                                fe.id("https://iview.abc.net.au"+episode['_links']['self']['href'])
+                                series_text=""
+                                # if current_series['_links']['selectedSeries']['id'] != '0':
+                                    # series_text = "S"+current_series['_links']['selectedSeries']['id']+" "
+                                fe.title(f'{series_text}EXTRA {episode["title"]}')
+                                epiry_date = datetime.datetime.strptime(episode['expireDate'],"%Y-%m-%d %H:%M:%S").strftime("%I:%M%p %d/%m/%Y")
+                                fe.description(f"Expires {epiry_date}\n{episode['description']}")
+                                fe.link(href=episode['shareUrl'])
+                                fe.published(datetime.datetime.strptime(episode['pubDate'],"%Y-%m-%d %H:%M:%S").astimezone())
+                else:
+                    honeybadger.notify(f"{show_info['type']} show type is not recognised!", context={"show_id": show, "uid": uid})
+            else:
+                honeybadger.notify(f"{request_result.status_code} error code is not recognised!", context={"show_id": show, "uid": uid})
+        resp = flask.Response(fg.rss_str(pretty=True))
+        resp.headers['Content-Type'] = 'application/rss+xml; charset=utf-8'
+        return resp
     else:
         honeybadger.notify(f"{request_result.status_code} error code is not recognised!", context={"uid": uid})
         return "501", 501
