@@ -98,6 +98,25 @@ def rss_show(show):
         honeybadger.notify(f"{request_result.status_code} error code is not recognised!", context={"show_id": show})
         return "501", 501
 
+@app.route("/watchlist/<uid>")
+def watchlist(uid):
+    watchlist_resp = requests.get("https://api.seesaw.abc.net.au/v1/saved/watchlist/show?source=iview&slug=watchlist&raw=1&done=0&UID="+uid)
+    if watchlist_resp.status_code == 200:
+        watchlist = json.loads(watchlist_resp.content.decode())
+        fg = FeedGenerator()
+        fg.id('https://iview-rss.maxstuff.net/watchlist/'+uid)
+        fg.title("iView Watchlist "+uid[:8])
+        fg.link(href='https://iview.abc.net.au/watchlist', rel="alternate")
+        fg.language('en')
+        fg.author({'name':'Max','uri':'https://maxstuff.net'})
+        fg.description("Compiled episodes of all shows on your iView watchlist.")
+        for item in watchlist['data']:
+            pass
+        return ''
+    else:
+        honeybadger.notify(f"{request_result.status_code} error code is not recognised!", context={"uid": uid})
+        return "501", 501
+    
 
 # LAST_GIT_PULL = 0
 
