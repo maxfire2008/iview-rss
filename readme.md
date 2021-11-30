@@ -2,7 +2,7 @@
 To get the RSS feed for a show you can simply take the iView show id `https://iview.abc.net.au/show/<showid>` and use it in the app `https://iview-rss.maxstuff.net/rss/<showid>`
 
 # Watchlist
-Go to `https://iview.abc.net.au/watchlist` with devtools network open and search for `api.seesaw` then get the UID parameter of the request and use it for `https://iview-rss.maxstuff.net/watchlist/<uid>`
+Go to `https://iview.abc.net.au/watchlist` with devtools network open and search for `api.seesaw` then get the UID parameter of the request and use it for `https://iview-rss.maxstuff.net/watchlist/<uid>` NB: this endpoint will be deployed by 3/12/21
 
 ## Parameters (Standard for GET request)
 | Parameter | Type | Default | Description |
