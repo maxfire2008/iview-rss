@@ -1,7 +1,7 @@
 import os
-from honeybadger import honeybadger
 
 if 'HONEY_BADGER_KEY_IVIEW_RSS_MAXSTUFF_NET' in os.environ:
+    from honeybadger import honeybadger    
     honeybadger.configure(api_key=os.environ['HONEY_BADGER_KEY_IVIEW_RSS_MAXSTUFF_NET'])
 else:
     print("\n\n\nWARNING: HONEY_BADGER_KEY_IVIEW_RSS_MAXSTUFF_NET NOT SET ERRORS WILL NOT BE REPORTED!\n\n\n")
