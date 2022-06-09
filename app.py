@@ -124,35 +124,36 @@ def watchlist(uid):
                 request_result_content = request_result.content.decode()
                 show_info = json.loads(request_result_content)
                 if show_info['type'] == 'series':
-                    for series in show_info['_embedded']['seriesList']:
-                        current_series = json.loads(
-                            requests.get(
-                                "https://api.iview.abc.net.au/v2"+series['_links']['deeplink']['href']
-                            ).content.decode()
-                        )
-                        for episode in current_series['_embedded']['selectedSeries']['_embedded']['videoEpisodes']:
-                            fe = fg.add_entry()
-                            fe.id("https://iview.abc.net.au"+episode['_links']['self']['href'])
-                            series_text=""
-                            # if current_series['_links']['selectedSeries']['id'] != '0':
-                                # series_text = "S"+current_series['_links']['selectedSeries']['id']+" "
-                            fe.title(f'{show_info["title"]} - {series_text}{episode["title"]}')
-                            epiry_date = datetime.datetime.strptime(episode['expireDate'],"%Y-%m-%d %H:%M:%S").strftime("%I:%M%p %d/%m/%Y")
-                            fe.description(f"Expires {epiry_date}\n{episode['description']}")
-                            fe.link(href=episode['shareUrl'])
-                            fe.published(datetime.datetime.strptime(episode['pubDate'],"%Y-%m-%d %H:%M:%S").astimezone())
-                        if include_extras and 'videoExtras' in current_series['_embedded']['selectedSeries']['_embedded']:
-                            for episode in current_series['_embedded']['selectedSeries']['_embedded']['videoExtras']:
+                    if "unavailableMessage" not in show_info:
+                        for series in show_info['_embedded']['seriesList']:
+                            current_series = json.loads(
+                                requests.get(
+                                    "https://api.iview.abc.net.au/v2"+series['_links']['deeplink']['href']
+                                ).content.decode()
+                            )
+                            for episode in current_series['_embedded']['selectedSeries']['_embedded']['videoEpisodes']:
                                 fe = fg.add_entry()
                                 fe.id("https://iview.abc.net.au"+episode['_links']['self']['href'])
                                 series_text=""
                                 # if current_series['_links']['selectedSeries']['id'] != '0':
                                     # series_text = "S"+current_series['_links']['selectedSeries']['id']+" "
-                                fe.title(f'{series_text}EXTRA {episode["title"]}')
+                                fe.title(f'{show_info["title"]} - {series_text}{episode["title"]}')
                                 epiry_date = datetime.datetime.strptime(episode['expireDate'],"%Y-%m-%d %H:%M:%S").strftime("%I:%M%p %d/%m/%Y")
                                 fe.description(f"Expires {epiry_date}\n{episode['description']}")
                                 fe.link(href=episode['shareUrl'])
                                 fe.published(datetime.datetime.strptime(episode['pubDate'],"%Y-%m-%d %H:%M:%S").astimezone())
+                            if include_extras and 'videoExtras' in current_series['_embedded']['selectedSeries']['_embedded']:
+                                for episode in current_series['_embedded']['selectedSeries']['_embedded']['videoExtras']:
+                                    fe = fg.add_entry()
+                                    fe.id("https://iview.abc.net.au"+episode['_links']['self']['href'])
+                                    series_text=""
+                                    # if current_series['_links']['selectedSeries']['id'] != '0':
+                                        # series_text = "S"+current_series['_links']['selectedSeries']['id']+" "
+                                    fe.title(f'{series_text}EXTRA {episode["title"]}')
+                                    epiry_date = datetime.datetime.strptime(episode['expireDate'],"%Y-%m-%d %H:%M:%S").strftime("%I:%M%p %d/%m/%Y")
+                                    fe.description(f"Expires {epiry_date}\n{episode['description']}")
+                                    fe.link(href=episode['shareUrl'])
+                                    fe.published(datetime.datetime.strptime(episode['pubDate'],"%Y-%m-%d %H:%M:%S").astimezone())
                 else:
                     honeybadger.notify(f"{show_info['type']} show type is not recognised!", context={"show_id": show, "uid": uid})
             else:
