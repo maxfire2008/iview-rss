@@ -15,6 +15,7 @@ import time
 from feedgen.feed import FeedGenerator
 import logging
 import csv
+import CONFIG
 
 app = flask.Flask(__name__)
 
@@ -197,13 +198,12 @@ def watchlist(uid):
         return "501", 501
 
 
-# LAST_GIT_PULL = 0
-
-# @app.route("/deploy_hook")
-# def deploy_hook():
-    # global LAST_GIT_PULL
-    # if LAST_GIT_PULL+10 < int(time.time()):
-        # os.system("git pull")
-        # LAST_GIT_PULL = int(time.time())
-        # return datetime.datetime.now().ctime()
-    # return "429", 429
+@app.route("/deploy/<key>", methods=["GET", "POST"])
+def deploy(key):
+    if key == CONFIG.DEPLOY_KEY:
+        # git pull return output
+        response = flask.Response(
+            os.popen("/usr/bin/git pull").read())  # skipcq: BAN-B605
+        response.headers["Content-Type"] = "text/plain"
+        return response
+    return "Invalid key", 403
