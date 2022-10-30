@@ -1,0 +1,10 @@
+version: '3.3'
+services:
+    iview-rss:
+        ports:
+            - '7176:7176'
+        restart: unless-stopped
+        image: iview-rss
+        build:
+            context: .
+            dockerfile: Dockerfile
